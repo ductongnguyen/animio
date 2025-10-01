@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+    img {
+      width: 100%;
+      height: 100%;
+      transition: opacity 0.2s ease;
+      cursor: pointer;
+    }
+    img.hidden {
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+  <img src="e9 dance.gif" id="character" />
+  
+  <script>
+    const { ipcRenderer } = require('electron')
+    const img = document.getElementById('character')
+    
+    // Khi chuột vào → ẩn animation
+    document.body.addEventListener('mouseenter', () => {
+      img.classList.add('hidden')
+      ipcRenderer.send('mouse-entered')
+    })
+    
+    // Khi chuột ra → hiện lại animation
+    document.body.addEventListener('mouseleave', () => {
+      img.classList.remove('hidden')
+      ipcRenderer.send('mouse-left')
+    })
+    
+    // Nhận lệnh từ main process để hiện lại
+    ipcRenderer.on('show-character', () => {
+      img.classList.remove('hidden')
+    })
+  </script>
+</body>
+</html>
