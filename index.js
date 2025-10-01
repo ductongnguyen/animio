@@ -197,26 +197,17 @@ app.on('ready', () => {
     windows[instance.id] = createGifWindow(instance)
   })
 
-  // Tạo system tray icon với menu
-  // Tạo icon đơn giản từ nativeImage
-  try {
-    // Tạo icon 16x16 màu trắng đơn giản
-    const icon = nativeImage.createEmpty()
-    const iconPath = path.join(__dirname, 'icon.png')
-    
-    if (fs.existsSync(iconPath)) {
-      const iconImage = nativeImage.createFromPath(iconPath)
-      if (!iconImage.isEmpty()) {
-        tray = new Tray(iconImage.resize({ width: 16, height: 16 }))
-      }
-    }
-    
-    // Nếu không tạo được từ file, tạo icon trống
-    if (!tray) {
-      // Tạo icon đơn giản 16x16
-      const emptyIcon = nativeImage.createFromDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAAdgAAAHYBTnsmCAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAABNSURBVDiNY2AYBaNgFIyCUTAKRgEjAwPDfwYGhv8MDAwMDAwMDP8ZGBgY/jMwMPxnYGBg+M/AwPCfgYHhPwMDw38GBob/DAwM/xkYGEYBAABmBgYGBgYGBgAAAABJRU5ErkJggg==')
-      tray = new Tray(emptyIcon)
-    }
+  // Tạo system tray icon từ logo.png
+  const iconPath = path.join(__dirname, 'logo.png')
+  let trayIcon = nativeImage.createFromPath(iconPath)
+  
+  // Resize về 16x16 cho tray
+  if (!trayIcon.isEmpty()) {
+    trayIcon = trayIcon.resize({ width: 16, height: 16 })
+  }
+  
+  tray = new Tray(trayIcon)
+  console.log('Tray icon created')
     
     function updateTrayMenu() {
       const contextMenu = Menu.buildFromTemplate([
@@ -254,11 +245,8 @@ app.on('ready', () => {
       tray.setContextMenu(contextMenu)
     }
     
-    updateTrayMenu()
-    tray.on('double-click', () => openSettings())
-  } catch (err) {
-    console.log('Tray icon disabled. Right-click animation to access settings.')
-  }
+  updateTrayMenu()
+  tray.on('double-click', () => openSettings())
 
   // Intelli-Hide: Xử lý sự kiện chuột (theo instance)
   let mouseCheckIntervals = {}
@@ -345,7 +333,8 @@ function openSettings() {
     width: 600,
     height: 500,
     resizable: true,
-    title: 'Manage GIF Instances',
+    title: 'Anima E - Manage GIF Instances',
+    icon: path.join(__dirname, 'logo.png'), // App icon
     autoHideMenuBar: true, // Ẩn menu bar
     webPreferences: {
       nodeIntegration: true,
