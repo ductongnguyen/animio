@@ -7,11 +7,17 @@
       background: transparent;
       overflow: hidden;
     }
+    body.draggable {
+      -webkit-app-region: drag; /* Chỉ cho phép kéo khi có class này */
+    }
     img {
       width: 100%;
       height: 100%;
       transition: opacity 0.2s ease;
       cursor: pointer;
+    }
+    body.draggable img {
+      cursor: move;
     }
     img.hidden {
       opacity: 0;
@@ -25,10 +31,53 @@
     const { ipcRenderer } = require('electron')
     const img = document.getElementById('character')
     
+    let isCustomPosition = false
+    let isAltPressed = false
+    
+    // Nhận GIF path từ main process
+    ipcRenderer.on('set-gif', (event, gifPath) => {
+      img.src = gifPath
+    })
+    
+    // Nhận thông tin position mode từ main process
+    ipcRenderer.on('position-mode', (event, position) => {
+      isCustomPosition = (position === 'custom')
+      updateDraggableState()
+    })
+    
+    // Theo dõi phím Alt
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Alt') {
+        isAltPressed = true
+        updateDraggableState()
+      }
+    })
+    
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'Alt') {
+        isAltPressed = false
+        updateDraggableState()
+      }
+    })
+    
+    // Cập nhật trạng thái draggable
+    function updateDraggableState() {
+      const shouldBeDraggable = isCustomPosition || isAltPressed
+      if (shouldBeDraggable) {
+        document.body.classList.add('draggable')
+        ipcRenderer.send('enable-dragging')
+      } else {
+        document.body.classList.remove('draggable')
+        ipcRenderer.send('disable-dragging')
+      }
+    }
+    
     // Khi chuột vào → ẩn animation
     document.body.addEventListener('mouseenter', () => {
-      img.classList.add('hidden')
-      ipcRenderer.send('mouse-entered')
+      if (!document.body.classList.contains('draggable')) {
+        img.classList.add('hidden')
+        ipcRenderer.send('mouse-entered')
+      }
     })
     
     // Khi chuột ra → hiện lại animation
@@ -40,6 +89,12 @@
     // Nhận lệnh từ main process để hiện lại
     ipcRenderer.on('show-character', () => {
       img.classList.remove('hidden')
+    })
+    
+    // Right-click menu để mở settings
+    document.body.addEventListener('contextmenu', (e) => {
+      e.preventDefault()
+      ipcRenderer.send('open-settings')
     })
   </script>
 </body>

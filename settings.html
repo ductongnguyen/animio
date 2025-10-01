@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #2c2c2c;
+      color: #fff;
+    }
+    
+    h1 {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+    
+    .setting-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .file-input-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    
+    input[type="text"] {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #555;
+      background: #1e1e1e;
+      color: #fff;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    button {
+      padding: 8px 16px;
+      background: #0078d4;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    
+    button:hover {
+      background: #106ebe;
+    }
+    
+    button:active {
+      background: #005a9e;
+    }
+    
+    select {
+      width: 100%;
+      padding: 8px 12px;
+      border: 1px solid #555;
+      background: #1e1e1e;
+      color: #fff;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #0078d4;
+    }
+    
+    .preview {
+      margin-top: 15px;
+      text-align: center;
+    }
+    
+    .preview img {
+      max-width: 150px;
+      max-height: 150px;
+      border: 2px solid #555;
+      border-radius: 4px;
+      background: #1e1e1e;
+    }
+    
+    .save-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 10px;
+      background: #107c10;
+      font-size: 15px;
+    }
+    
+    .save-btn:hover {
+      background: #0e6b0e;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚙️ Settings</h1>
+  
+  <div class="setting-group">
+    <label>Animation GIF:</label>
+    <div class="file-input-group">
+      <input type="text" id="gifPath" readonly placeholder="Select a GIF file...">
+      <button id="browseBtn">Browse</button>
+    </div>
+    
+    <div class="preview" id="previewContainer" style="display: none;">
+      <img id="previewImg" src="" alt="Preview">
+    </div>
+  </div>
+  
+  <div class="setting-group">
+    <label>
+      <input type="checkbox" id="clickThroughCheckbox">
+      Enable Click-Through (ignore mouse events)
+    </label>
+    <p style="font-size: 12px; color: #aaa; margin-top: 5px;">
+      When enabled, clicks will pass through the animation to windows below.
+    </p>
+  </div>
+  
+  <div class="setting-group">
+    <label>Position on Screen:</label>
+    <select id="positionSelect">
+      <option value="bottom-right">Bottom Right (Default)</option>
+      <option value="bottom-left">Bottom Left</option>
+      <option value="top-right">Top Right</option>
+      <option value="top-left">Top Left</option>
+      <option value="center">Center</option>
+      <option value="custom">Custom (Drag to position)</option>
+    </select>
+    <p style="font-size: 12px; color: #aaa; margin-top: 5px;">
+      Select "Custom" to drag the animation anywhere on screen.
+    </p>
+  </div>
+  
+  <button class="save-btn" id="saveBtn">Save & Apply</button>
+  
+  <script>
+    const { ipcRenderer } = require('electron')
+    const path = require('path')
+    
+    const gifPathInput = document.getElementById('gifPath')
+    const browseBtn = document.getElementById('browseBtn')
+    const saveBtn = document.getElementById('saveBtn')
+    const previewContainer = document.getElementById('previewContainer')
+    const previewImg = document.getElementById('previewImg')
+    const clickThroughCheckbox = document.getElementById('clickThroughCheckbox')
+    const positionSelect = document.getElementById('positionSelect')
+    
+    let selectedGifPath = ''
+    
+    // Load current settings
+    ipcRenderer.invoke('get-current-settings').then(settings => {
+      if (settings.gifPath) {
+        selectedGifPath = settings.gifPath
+        gifPathInput.value = path.basename(settings.gifPath)
+        previewImg.src = settings.gifPath
+        previewContainer.style.display = 'block'
+      }
+      clickThroughCheckbox.checked = settings.clickThrough || false
+      positionSelect.value = settings.position || 'bottom-right'
+    })
+    
+    // Browse for GIF file
+    browseBtn.addEventListener('click', async () => {
+      const result = await ipcRenderer.invoke('select-gif-file')
+      if (result) {
+        selectedGifPath = result
+        gifPathInput.value = path.basename(result)
+        previewImg.src = result
+        previewContainer.style.display = 'block'
+      }
+    })
+    
+    // Save settings
+    saveBtn.addEventListener('click', () => {
+      if (selectedGifPath) {
+        const settings = {
+          gifPath: selectedGifPath,
+          clickThrough: clickThroughCheckbox.checked,
+          position: positionSelect.value
+        }
+        ipcRenderer.send('save-settings', settings)
+        window.close()
+      }
+    })
+  </script>
+</body>
+</html>
