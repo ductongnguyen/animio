@@ -1,14 +1,17 @@
-# Desktop Animation Widget
+# Anima E - Desktop Animation Widget
 
-A cute desktop animation widget that sits on your taskbar with intelligent hide features.
+A powerful desktop animation widget with multiple instances support and intelligent features.
 
 ## Features
 
-- **Desktop Animation**: Displays a GIF animation at the bottom-right of your screen, touching the taskbar
-- **Intelli-Hide**: Animation automatically fades out when you hover over it, allowing you to click through to items behind it
-- **Customizable GIF**: Change the animation through the settings menu
-- **System Tray**: Access settings and quit from the system tray icon
-- **Persistent Settings**: Your GIF selection is saved and loaded on startup
+- 🎬 **Multiple GIF Instances**: Add unlimited GIF animations on your desktop
+- 📍 **Flexible Positioning**: 6 preset positions + custom drag-and-drop positioning
+- 👻 **Intelli-Hide**: Animations fade out when you hover over them
+- 🖱️ **Click-Through Mode**: Make animations non-interactive (clicks pass through)
+- 🚀 **Auto Start**: Launch automatically with Windows
+- ⌨️ **Global Shortcuts**: Ctrl+Shift+S to open settings, Alt+Drag to reposition
+- 💾 **Persistent Settings**: All configurations saved automatically
+- 🎯 **System Tray**: Clean interface, no taskbar clutter
 
 ## Installation
 
@@ -45,21 +48,35 @@ Output will be in the `dist/` folder.
 ## Usage
 
 ### Opening Settings
-You can open settings in three ways:
-1. **Right-click** on the animation
-2. **Right-click** the system tray icon → Settings
-3. **Double-click** the system tray icon
+- **Keyboard**: Press `Ctrl+Shift+S`
+- **Right-click** on any animation
+- **Right-click** the system tray icon → "Manage Instances"
+- **Double-click** the system tray icon
 
-### Changing the Animation
-1. Open Settings
-2. Click "Browse" to select a new GIF file
-3. Preview will show your selected GIF
-4. Click "Save & Apply" to update the animation
+### Managing Instances
+1. Click "+ Add New Instance" to create a new animation
+2. For each instance, you can:
+   - **Browse GIF**: Select a different GIF file
+   - **Position**: Choose from 6 presets or Custom (drag to position)
+   - **Click-Through**: Enable to make animation non-interactive
+   - **Delete**: Remove the instance (must keep at least 1)
+
+### Positioning Animations
+- **Preset Positions**: Bottom Right, Bottom Left, Top Right, Top Left, Center
+- **Custom Position**: 
+  - Select "Custom (Drag)" in position dropdown
+  - Click and drag the animation anywhere on screen
+  - Or hold `Alt` key and drag any animation temporarily
+
+### Auto Start with Windows
+- Right-click system tray icon
+- Check "Start with Windows"
+- App will launch automatically on Windows startup
 
 ### Intelli-Hide Feature
-- Move your mouse over the animation → it fades out
+- Move your mouse over an animation → it fades out
 - Move your mouse away → it fades back in
-- This allows you to click on taskbar icons or desktop items behind the animation
+- Disabled when in drag mode or click-through mode
 
 ## Configuration
 

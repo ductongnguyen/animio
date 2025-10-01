@@ -11,188 +11,260 @@
     }
     
     h1 {
-      font-size: 18px;
+      font-size: 20px;
       margin-bottom: 20px;
     }
     
-    .setting-group {
-      margin-bottom: 20px;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-    
-    .file-input-group {
+    .header {
       display: flex;
-      gap: 10px;
+      justify-content: space-between;
       align-items: center;
+      margin-bottom: 20px;
     }
     
-    input[type="text"] {
-      flex: 1;
-      padding: 8px 12px;
-      border: 1px solid #555;
-      background: #1e1e1e;
-      color: #fff;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-    
-    button {
+    .add-btn {
       padding: 8px 16px;
-      background: #0078d4;
+      background: #107c10;
       color: #fff;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       font-size: 14px;
-      transition: background 0.2s;
+    }
+    
+    .add-btn:hover {
+      background: #0e6b0e;
+    }
+    
+    .instances-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .instance-card {
+      background: #1e1e1e;
+      border: 1px solid #555;
+      border-radius: 8px;
+      padding: 15px;
+    }
+    
+    .instance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .instance-title {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    
+    .instance-controls {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .instance-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      font-size: 13px;
+    }
+    
+    .instance-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .instance-field label {
+      color: #aaa;
+      font-size: 12px;
+    }
+    
+    .instance-field input[type="text"],
+    .instance-field select {
+      padding: 6px 10px;
+      border: 1px solid #555;
+      background: #2c2c2c;
+      color: #fff;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    
+    .instance-field input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+    }
+    
+    button {
+      padding: 6px 12px;
+      background: #0078d4;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
     }
     
     button:hover {
       background: #106ebe;
     }
     
-    button:active {
-      background: #005a9e;
+    button.delete-btn {
+      background: #c50f1f;
     }
     
-    select {
-      width: 100%;
-      padding: 8px 12px;
+    button.delete-btn:hover {
+      background: #a00f1f;
+    }
+    
+    button.browse-btn {
+      background: #0078d4;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    
+    .preview-img {
+      max-width: 80px;
+      max-height: 80px;
       border: 1px solid #555;
-      background: #1e1e1e;
-      color: #fff;
       border-radius: 4px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    
-    select:focus {
-      outline: none;
-      border-color: #0078d4;
-    }
-    
-    .preview {
-      margin-top: 15px;
-      text-align: center;
-    }
-    
-    .preview img {
-      max-width: 150px;
-      max-height: 150px;
-      border: 2px solid #555;
-      border-radius: 4px;
-      background: #1e1e1e;
-    }
-    
-    .save-btn {
-      width: 100%;
-      margin-top: 20px;
-      padding: 10px;
-      background: #107c10;
-      font-size: 15px;
-    }
-    
-    .save-btn:hover {
-      background: #0e6b0e;
+      margin-top: 5px;
     }
   </style>
 </head>
 <body>
-  <h1>⚙️ Settings</h1>
-  
-  <div class="setting-group">
-    <label>Animation GIF:</label>
-    <div class="file-input-group">
-      <input type="text" id="gifPath" readonly placeholder="Select a GIF file...">
-      <button id="browseBtn">Browse</button>
-    </div>
-    
-    <div class="preview" id="previewContainer" style="display: none;">
-      <img id="previewImg" src="" alt="Preview">
+  <div class="header">
+    <h1>🎬 Manage GIF Instances</h1>
+    <div style="display: flex; gap: 10px;">
+      <button class="add-btn" id="addBtn">+ Add New Instance</button>
     </div>
   </div>
   
-  <div class="setting-group">
-    <label>
-      <input type="checkbox" id="clickThroughCheckbox">
-      Enable Click-Through (ignore mouse events)
-    </label>
-    <p style="font-size: 12px; color: #aaa; margin-top: 5px;">
-      When enabled, clicks will pass through the animation to windows below.
-    </p>
-  </div>
+  <div class="instances-list" id="instancesList"></div>
   
-  <div class="setting-group">
-    <label>Position on Screen:</label>
-    <select id="positionSelect">
-      <option value="bottom-right">Bottom Right (Default)</option>
-      <option value="bottom-left">Bottom Left</option>
-      <option value="top-right">Top Right</option>
-      <option value="top-left">Top Left</option>
-      <option value="center">Center</option>
-      <option value="custom">Custom (Drag to position)</option>
-    </select>
-    <p style="font-size: 12px; color: #aaa; margin-top: 5px;">
-      Select "Custom" to drag the animation anywhere on screen.
-    </p>
+  <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #555; color: #aaa; font-size: 12px;">
+    💡 Changes are saved automatically. Config file location: <code style="background: #1e1e1e; padding: 2px 6px; border-radius: 3px;">%AppData%/anima-e/config.json</code>
   </div>
-  
-  <button class="save-btn" id="saveBtn">Save & Apply</button>
   
   <script>
     const { ipcRenderer } = require('electron')
     const path = require('path')
     
-    const gifPathInput = document.getElementById('gifPath')
-    const browseBtn = document.getElementById('browseBtn')
-    const saveBtn = document.getElementById('saveBtn')
-    const previewContainer = document.getElementById('previewContainer')
-    const previewImg = document.getElementById('previewImg')
-    const clickThroughCheckbox = document.getElementById('clickThroughCheckbox')
-    const positionSelect = document.getElementById('positionSelect')
+    let instances = []
     
-    let selectedGifPath = ''
+    // Load instances
+    async function loadInstances() {
+      instances = await ipcRenderer.invoke('get-instances')
+      renderInstances()
+    }
     
-    // Load current settings
-    ipcRenderer.invoke('get-current-settings').then(settings => {
-      if (settings.gifPath) {
-        selectedGifPath = settings.gifPath
-        gifPathInput.value = path.basename(settings.gifPath)
-        previewImg.src = settings.gifPath
-        previewContainer.style.display = 'block'
+    // Render instances list
+    function renderInstances() {
+      const list = document.getElementById('instancesList')
+      list.innerHTML = ''
+      
+      instances.forEach((instance, index) => {
+        const card = document.createElement('div')
+        card.className = 'instance-card'
+        card.innerHTML = `
+          <div class="instance-header">
+            <div class="instance-title">Instance #${index + 1}</div>
+            <div class="instance-controls">
+              <button class="browse-btn" onclick="browseGif('${instance.id}')">Browse GIF</button>
+              <button class="delete-btn" onclick="removeInstance('${instance.id}')">Delete</button>
+            </div>
+          </div>
+          <div class="instance-body">
+            <div class="instance-field">
+              <label>GIF File:</label>
+              <input type="text" value="${path.basename(instance.gifPath)}" readonly>
+              ${instance.gifPath ? `<img src="${instance.gifPath}" class="preview-img">` : ''}
+            </div>
+            <div class="instance-field">
+              <label>Position:</label>
+              <select onchange="updateInstance('${instance.id}', 'position', this.value)">
+                <option value="bottom-right" ${instance.position === 'bottom-right' ? 'selected' : ''}>Bottom Right</option>
+                <option value="bottom-left" ${instance.position === 'bottom-left' ? 'selected' : ''}>Bottom Left</option>
+                <option value="top-right" ${instance.position === 'top-right' ? 'selected' : ''}>Top Right</option>
+                <option value="top-left" ${instance.position === 'top-left' ? 'selected' : ''}>Top Left</option>
+                <option value="center" ${instance.position === 'center' ? 'selected' : ''}>Center</option>
+                <option value="custom" ${instance.position === 'custom' ? 'selected' : ''}>Custom (Drag)</option>
+              </select>
+            </div>
+            <div class="instance-field">
+              <label>
+                <input type="checkbox" ${instance.clickThrough ? 'checked' : ''} 
+                       onchange="updateInstance('${instance.id}', 'clickThrough', this.checked)">
+                Click-Through Mode
+              </label>
+            </div>
+            <div class="instance-field">
+              <label>
+                <input type="checkbox" ${instance.dragMode ? 'checked' : ''} 
+                       onchange="updateInstance('${instance.id}', 'dragMode', this.checked)">
+                Drag Mode (Always Draggable)
+              </label>
+            </div>
+          </div>
+        `
+        list.appendChild(card)
+      })
+    }
+    
+    // Add new instance
+    document.getElementById('addBtn').addEventListener('click', async () => {
+      const defaultGifPath = await ipcRenderer.invoke('get-default-gif-path')
+      const newInstance = {
+        id: 'instance_' + Date.now(),
+        gifPath: defaultGifPath,
+        clickThrough: false,
+        dragMode: false,
+        position: 'bottom-right',
+        customX: null,
+        customY: null
       }
-      clickThroughCheckbox.checked = settings.clickThrough || false
-      positionSelect.value = settings.position || 'bottom-right'
+      ipcRenderer.send('add-instance', newInstance)
+      instances.push(newInstance)
+      renderInstances()
     })
     
-    // Browse for GIF file
-    browseBtn.addEventListener('click', async () => {
+    // Browse GIF for instance
+    window.browseGif = async (instanceId) => {
       const result = await ipcRenderer.invoke('select-gif-file')
       if (result) {
-        selectedGifPath = result
-        gifPathInput.value = path.basename(result)
-        previewImg.src = result
-        previewContainer.style.display = 'block'
+        updateInstance(instanceId, 'gifPath', result)
       }
-    })
+    }
     
-    // Save settings
-    saveBtn.addEventListener('click', () => {
-      if (selectedGifPath) {
-        const settings = {
-          gifPath: selectedGifPath,
-          clickThrough: clickThroughCheckbox.checked,
-          position: positionSelect.value
-        }
-        ipcRenderer.send('save-settings', settings)
-        window.close()
+    // Update instance
+    window.updateInstance = (instanceId, field, value) => {
+      const instance = instances.find(inst => inst.id === instanceId)
+      if (instance) {
+        instance[field] = value
+        ipcRenderer.send('update-instance', instanceId, { [field]: value })
+        renderInstances()
       }
-    })
+    }
+    
+    // Remove instance
+    window.removeInstance = (instanceId) => {
+      if (instances.length === 1) {
+        alert('Cannot delete the last instance!')
+        return
+      }
+      if (confirm('Are you sure you want to delete this instance?')) {
+        ipcRenderer.send('remove-instance', instanceId)
+        instances = instances.filter(inst => inst.id !== instanceId)
+        renderInstances()
+      }
+    }
+    
+    // Initialize
+    loadInstances()
   </script>
 </body>
 </html>

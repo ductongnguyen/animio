@@ -8,7 +8,8 @@
     "build": "electron-builder",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
-    "build:linux": "electron-builder --linux"
+    "build:linux": "electron-builder --linux",
+    "pack": "electron-packager . \"Anima E\" --platform=win32 --arch=x64 --out=dist --overwrite"
   },
   "keywords": [
     "desktop",
@@ -20,7 +21,9 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^38.2.0",
-    "electron-builder": "^24.13.3"
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^17.1.2",
+    "png-to-ico": "^3.0.1"
   },
   "build": {
     "appId": "com.anima-e.desktop",
@@ -33,6 +36,7 @@
       "index.html",
       "settings.html",
       "*.gif",
+      "logo.png",
       "package.json"
     ],
     "win": {
@@ -40,7 +44,9 @@
         "nsis",
         "portable"
       ],
-      "icon": "e9 dance.gif"
+      "icon": "logo.png",
+      "sign": null,
+      "signingHashAlgorithms": null
     },
     "mac": {
       "target": [
@@ -61,6 +67,10 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true
-    }
+    },
+    "forceCodeSigning": false
+  },
+  "dependencies": {
+    "auto-launch": "^5.0.6"
   }
 }

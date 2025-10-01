@@ -7,8 +7,9 @@
       background: transparent;
       overflow: hidden;
     }
-    body.draggable {
-      -webkit-app-region: drag; /* Chỉ cho phép kéo khi có class này */
+    /* Chỉ enable drag khi có class allow-drag */
+    body.allow-drag {
+      -webkit-app-region: drag;
     }
     img {
       width: 100%;
@@ -16,7 +17,7 @@
       transition: opacity 0.2s ease;
       cursor: pointer;
     }
-    body.draggable img {
+    body.allow-drag img {
       cursor: move;
     }
     img.hidden {
@@ -32,49 +33,51 @@
     const img = document.getElementById('character')
     
     let isCustomPosition = false
-    let isAltPressed = false
+    let isDragModeEnabled = false
+    let isSettingsOpen = false
+    
+    // Enable/disable dragging - CHỈ khi settings đang mở
+    function updateDragState() {
+      const shouldDrag = isDragModeEnabled && isSettingsOpen
+      console.log('updateDragState:', { isDragModeEnabled, isSettingsOpen, shouldDrag })
+      
+      if (shouldDrag) {
+        document.body.classList.add('allow-drag')
+        ipcRenderer.send('enable-dragging')
+      } else {
+        document.body.classList.remove('allow-drag')
+        ipcRenderer.send('disable-dragging')
+      }
+    }
     
     // Nhận GIF path từ main process
     ipcRenderer.on('set-gif', (event, gifPath) => {
       img.src = gifPath
     })
     
-    // Nhận thông tin position mode từ main process
+    // Nhận drag mode setting
+    ipcRenderer.on('drag-mode', (event, enabled) => {
+      console.log('Received drag-mode:', enabled)
+      isDragModeEnabled = enabled
+      updateDragState()
+    })
+    
+    // Nhận thông báo settings mở/đóng
+    ipcRenderer.on('settings-opened', (event, opened) => {
+      console.log('Settings opened:', opened)
+      isSettingsOpen = opened
+      updateDragState()
+    })
+    
+    // Nhận thông tin position mode
     ipcRenderer.on('position-mode', (event, position) => {
       isCustomPosition = (position === 'custom')
-      updateDraggableState()
     })
     
-    // Theo dõi phím Alt
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Alt') {
-        isAltPressed = true
-        updateDraggableState()
-      }
-    })
-    
-    document.addEventListener('keyup', (e) => {
-      if (e.key === 'Alt') {
-        isAltPressed = false
-        updateDraggableState()
-      }
-    })
-    
-    // Cập nhật trạng thái draggable
-    function updateDraggableState() {
-      const shouldBeDraggable = isCustomPosition || isAltPressed
-      if (shouldBeDraggable) {
-        document.body.classList.add('draggable')
-        ipcRenderer.send('enable-dragging')
-      } else {
-        document.body.classList.remove('draggable')
-        ipcRenderer.send('disable-dragging')
-      }
-    }
-    
-    // Khi chuột vào → ẩn animation
+    // Khi chuột vào → ẩn animation (nếu không đang ở drag mode)
     document.body.addEventListener('mouseenter', () => {
-      if (!document.body.classList.contains('draggable')) {
+      const isDragging = isDragModeEnabled && isSettingsOpen
+      if (!isDragging) {
         img.classList.add('hidden')
         ipcRenderer.send('mouse-entered')
       }
@@ -89,12 +92,6 @@
     // Nhận lệnh từ main process để hiện lại
     ipcRenderer.on('show-character', () => {
       img.classList.remove('hidden')
-    })
-    
-    // Right-click menu để mở settings
-    document.body.addEventListener('contextmenu', (e) => {
-      e.preventDefault()
-      ipcRenderer.send('open-settings')
     })
   </script>
 </body>

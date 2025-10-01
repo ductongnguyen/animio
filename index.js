@@ -1,4 +1,5 @@
 const { app, BrowserWindow, screen, ipcMain, dialog, Menu, Tray, nativeImage, globalShortcut } = require('electron')
+const AutoLaunch = require('auto-launch')
 const path = require('path')
 const fs = require('fs')
 
@@ -12,17 +13,52 @@ const configPath = path.join(app.getPath('userData'), 'config.json')
 function loadConfig() {
   try {
     if (fs.existsSync(configPath)) {
-      return JSON.parse(fs.readFileSync(configPath, 'utf8'))
+      const config = JSON.parse(fs.readFileSync(configPath, 'utf8'))
+      console.log('Config loaded from:', configPath)
+      console.log('Instances count:', config.instances ? config.instances.length : 0)
+      
+      // Migration: chuyển từ config cũ sang config mới với instances
+      if (!config.instances && config.gifPath) {
+        console.log('Migrating old config to new format')
+        return {
+          instances: [{
+            id: 'default',
+            gifPath: config.gifPath,
+            clickThrough: config.clickThrough || false,
+            dragMode: false,
+            position: config.position || 'bottom-right',
+            customX: config.customX || null,
+            customY: config.customY || null
+          }]
+        }
+      }
+      
+      // Migration: thêm dragMode cho instances cũ
+      if (config.instances) {
+        config.instances.forEach(instance => {
+          if (instance.dragMode === undefined) {
+            instance.dragMode = false
+          }
+        })
+      }
+      
+      return config
     }
   } catch (err) {
     console.error('Error loading config:', err)
   }
+  console.log('Creating default config')
   return { 
-    gifPath: path.join(__dirname, 'e9 dance.gif'),
-    clickThrough: false,
-    position: 'bottom-right',
-    customX: null,
-    customY: null
+    instances: [{
+      id: 'default',
+      gifPath: path.join(__dirname, 'e9 dance.gif'),
+      clickThrough: false,
+      dragMode: false,
+      position: 'bottom-right',
+      customX: null,
+      customY: null
+    }],
+    autoStart: false
   }
 }
 
@@ -30,15 +66,22 @@ function loadConfig() {
 function saveConfig(config) {
   try {
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2))
+    console.log('Config saved:', configPath)
   } catch (err) {
     console.error('Error saving config:', err)
   }
 }
 
 let config = loadConfig()
-let mainWin = null
+let windows = {} // Object để lưu các window instances: { instanceId: BrowserWindow }
 let settingsWin = null
 let tray = null
+
+// Cấu hình auto launch
+const autoLauncher = new AutoLaunch({
+  name: 'Anima E',
+  path: app.getPath('exe'),
+})
 
 // Hàm tính vị trí dựa trên setting
 function calculatePosition(position, winWidth, winHeight, customX = null, customY = null) {
@@ -82,15 +125,13 @@ function calculatePosition(position, winWidth, winHeight, customX = null, custom
   return { x, y }
 }
 
-app.on('ready', () => {
-  // Kích thước cửa sổ nhân vật
+// Tạo một window instance cho một GIF
+function createGifWindow(instance) {
   const winWidth = 200
   const winHeight = 200
-
-  // Tính vị trí dựa trên config
-  const { x, y } = calculatePosition(config.position || 'bottom-right', winWidth, winHeight, config.customX, config.customY)
-
-  mainWin = new BrowserWindow({
+  const { x, y } = calculatePosition(instance.position, winWidth, winHeight, instance.customX, instance.customY)
+  
+  const win = new BrowserWindow({
     width: winWidth,
     height: winHeight,
     x,
@@ -99,21 +140,61 @@ app.on('ready', () => {
     transparent: true,
     alwaysOnTop: true,
     hasShadow: false,
-    movable: true, // Cho phép kéo cửa sổ
+    movable: true,
+    skipTaskbar: true, // Ẩn khỏi taskbar
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      devTools: false, // Vô hiệu hóa DevTools
     },
   })
   
-  // Lắng nghe sự kiện kéo thả - lưu vị trí mới khi người dùng kéo
-  mainWin.on('moved', () => {
-    if (config.position === 'custom') {
-      const [newX, newY] = mainWin.getPosition()
-      config.customX = newX
-      config.customY = newY
-      saveConfig(config)
+  // Lắng nghe sự kiện kéo thả
+  win.on('moved', () => {
+    // Tìm instance trong config để cập nhật
+    const configInstance = config.instances.find(inst => inst.id === instance.id)
+    if (configInstance) {
+      const [newX, newY] = win.getPosition()
+      console.log(`Window moved: ${instance.id}, position: ${configInstance.position}, x: ${newX}, y: ${newY}`)
+      
+      if (configInstance.position === 'custom') {
+        configInstance.customX = newX
+        configInstance.customY = newY
+        instance.customX = newX
+        instance.customY = newY
+        saveConfig(config)
+        console.log('Custom position saved!')
+      }
     }
+  })
+  
+  win.loadFile('index.html')
+  win.webContents.on('did-finish-load', () => {
+    win.webContents.send('set-gif', instance.gifPath)
+    win.webContents.send('position-mode', instance.position)
+    const dragMode = instance.dragMode || false
+    console.log(`Sending drag-mode to ${instance.id}: ${dragMode}`)
+    win.webContents.send('drag-mode', dragMode)
+    win.webContents.send('instance-id', instance.id)
+  })
+  
+  // Apply click-through
+  const clickThrough = instance.clickThrough || false
+  win.setIgnoreMouseEvents(clickThrough, { forward: true })
+  console.log(`Window ${instance.id} created with click-through: ${clickThrough}`)
+  
+  return win
+}
+
+app.on('ready', () => {
+  // Áp dụng auto start setting
+  if (config.autoStart) {
+    autoLauncher.enable()
+  }
+  
+  // Tạo tất cả các GIF windows từ config
+  config.instances.forEach(instance => {
+    windows[instance.id] = createGifWindow(instance)
   })
 
   // Tạo system tray icon với menu
@@ -140,21 +221,23 @@ app.on('ready', () => {
     function updateTrayMenu() {
       const contextMenu = Menu.buildFromTemplate([
         {
-          label: 'Settings',
+          label: 'Manage Instances',
           click: () => openSettings()
         },
         {
           type: 'separator'
         },
         {
-          label: 'Click-Through Mode',
+          label: 'Start with Windows',
           type: 'checkbox',
-          checked: config.clickThrough,
-          click: (menuItem) => {
-            config.clickThrough = menuItem.checked
+          checked: config.autoStart || false,
+          click: async (menuItem) => {
+            config.autoStart = menuItem.checked
             saveConfig(config)
-            if (mainWin) {
-              mainWin.setIgnoreMouseEvents(config.clickThrough, { forward: true })
+            if (menuItem.checked) {
+              await autoLauncher.enable()
+            } else {
+              await autoLauncher.disable()
             }
             updateTrayMenu()
           }
@@ -167,7 +250,7 @@ app.on('ready', () => {
           click: () => app.quit()
         }
       ])
-      tray.setToolTip('Desktop Animation')
+      tray.setToolTip('Desktop Animation - ' + config.instances.length + ' instance(s)')
       tray.setContextMenu(contextMenu)
     }
     
@@ -177,17 +260,22 @@ app.on('ready', () => {
     console.log('Tray icon disabled. Right-click animation to access settings.')
   }
 
-  // Intelli-Hide: Xử lý sự kiện chuột
-  let mouseCheckInterval = null
+  // Intelli-Hide: Xử lý sự kiện chuột (theo instance)
+  let mouseCheckIntervals = {}
   
-  ipcMain.on('mouse-entered', () => {
-    if (!mainWin) return
-    // Khi chuột vào, bắt đầu kiểm tra vị trí chuột
-    if (mouseCheckInterval) clearInterval(mouseCheckInterval)
+  ipcMain.on('mouse-entered', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return
     
-    mouseCheckInterval = setInterval(() => {
+    const instanceId = Object.keys(windows).find(id => windows[id] === win)
+    if (!instanceId) return
+    
+    // Khi chuột vào, bắt đầu kiểm tra vị trí chuột
+    if (mouseCheckIntervals[instanceId]) clearInterval(mouseCheckIntervals[instanceId])
+    
+    mouseCheckIntervals[instanceId] = setInterval(() => {
       const mousePos = screen.getCursorScreenPoint()
-      const winBounds = mainWin.getBounds()
+      const winBounds = win.getBounds()
       
       // Kiểm tra xem chuột có còn trong vùng window không
       const isMouseInside = 
@@ -198,58 +286,52 @@ app.on('ready', () => {
       
       if (!isMouseInside) {
         // Chuột đã rời khỏi → dừng kiểm tra và hiện lại
-        clearInterval(mouseCheckInterval)
-        mouseCheckInterval = null
-        mainWin.webContents.send('show-character')
+        clearInterval(mouseCheckIntervals[instanceId])
+        delete mouseCheckIntervals[instanceId]
+        win.webContents.send('show-character')
       }
     }, 50)
   })
   
-  ipcMain.on('mouse-left', () => {
+  ipcMain.on('mouse-left', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return
+    
+    const instanceId = Object.keys(windows).find(id => windows[id] === win)
+    if (!instanceId) return
+    
     // Dọn dẹp interval nếu có
-    if (mouseCheckInterval) {
-      clearInterval(mouseCheckInterval)
-      mouseCheckInterval = null
+    if (mouseCheckIntervals[instanceId]) {
+      clearInterval(mouseCheckIntervals[instanceId])
+      delete mouseCheckIntervals[instanceId]
     }
   })
   
-  // Xử lý kéo thả - bật/tắt movable và click-through
-  ipcMain.on('enable-dragging', () => {
-    if (mainWin) {
-      mainWin.setIgnoreMouseEvents(false)
+  // Xử lý kéo thả - bật/tắt click-through
+  ipcMain.on('enable-dragging', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (win) {
+      // Tắt click-through khi đang kéo
+      win.setIgnoreMouseEvents(false)
+      console.log('Dragging enabled - click-through disabled')
     }
   })
   
-  ipcMain.on('disable-dragging', () => {
-    if (mainWin) {
-      mainWin.setIgnoreMouseEvents(config.clickThrough, { forward: true })
+  ipcMain.on('disable-dragging', (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender)
+    if (!win) return
+    
+    const instanceId = Object.keys(windows).find(id => windows[id] === win)
+    if (!instanceId) return
+    
+    const instance = config.instances.find(inst => inst.id === instanceId)
+    if (instance) {
+      // Khôi phục click-through setting của instance
+      win.setIgnoreMouseEvents(instance.clickThrough || false, { forward: true })
+      console.log(`Dragging disabled - click-through restored: ${instance.clickThrough}`)
     }
   })
-
-  // Apply click-through setting
-  function applyClickThrough() {
-    if (mainWin) {
-      mainWin.setIgnoreMouseEvents(config.clickThrough, { forward: true })
-    }
-  }
   
-  applyClickThrough()
-
-  mainWin.loadFile('index.html')
-  mainWin.webContents.on('did-finish-load', () => {
-    mainWin.webContents.send('set-gif', config.gifPath)
-    mainWin.webContents.send('position-mode', config.position || 'bottom-right')
-  })
-  
-  // Đăng ký global shortcut để mở settings
-  globalShortcut.register('CommandOrControl+Shift+S', () => {
-    openSettings()
-  })
-})
-
-app.on('will-quit', () => {
-  // Hủy đăng ký shortcuts
-  globalShortcut.unregisterAll()
 })
 
 // Mở cửa sổ settings
@@ -260,31 +342,45 @@ function openSettings() {
   }
   
   settingsWin = new BrowserWindow({
-    width: 400,
-    height: 350,
-    resizable: false,
-    title: 'Settings',
+    width: 600,
+    height: 500,
+    resizable: true,
+    title: 'Manage GIF Instances',
+    autoHideMenuBar: true, // Ẩn menu bar
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
+      devTools: false, // Vô hiệu hóa DevTools
     },
   })
   
   settingsWin.loadFile('settings.html')
+  
+  // Khi settings mở, enable drag mode cho tất cả windows
+  settingsWin.on('ready-to-show', () => {
+    Object.values(windows).forEach(win => {
+      win.webContents.send('settings-opened', true)
+    })
+  })
+  
+  // Khi settings đóng, disable drag mode
   settingsWin.on('closed', () => {
+    Object.values(windows).forEach(win => {
+      if (win && !win.isDestroyed()) {
+        win.webContents.send('settings-opened', false)
+      }
+    })
     settingsWin = null
   })
 }
 
 // IPC handlers cho settings
-ipcMain.handle('get-current-settings', () => {
-  return {
-    gifPath: config.gifPath,
-    clickThrough: config.clickThrough || false,
-    position: config.position || 'bottom-right',
-    customX: config.customX,
-    customY: config.customY
-  }
+ipcMain.handle('get-instances', () => {
+  return config.instances
+})
+
+ipcMain.handle('get-default-gif-path', () => {
+  return path.join(__dirname, 'e9 dance.gif')
 })
 
 ipcMain.handle('select-gif-file', async () => {
@@ -302,27 +398,46 @@ ipcMain.handle('select-gif-file', async () => {
   return null
 })
 
-ipcMain.on('save-settings', (event, settings) => {
-  config.gifPath = settings.gifPath
-  config.clickThrough = settings.clickThrough
-  config.position = settings.position
+// Thêm instance mới
+ipcMain.on('add-instance', (event, instance) => {
+  config.instances.push(instance)
   saveConfig(config)
-  
-  // Cập nhật GIF và vị trí trong main window
-  if (mainWin) {
-    mainWin.webContents.send('set-gif', settings.gifPath)
-    mainWin.webContents.send('position-mode', settings.position)
-    mainWin.setIgnoreMouseEvents(settings.clickThrough, { forward: true })
+  windows[instance.id] = createGifWindow(instance)
+})
+
+// Xóa instance
+ipcMain.on('remove-instance', (event, instanceId) => {
+  const index = config.instances.findIndex(inst => inst.id === instanceId)
+  if (index !== -1) {
+    config.instances.splice(index, 1)
+    saveConfig(config)
     
-    // Cập nhật vị trí (trừ khi ở chế độ custom - để người dùng tự kéo)
-    if (settings.position !== 'custom') {
-      const bounds = mainWin.getBounds()
-      const { x, y } = calculatePosition(settings.position, bounds.width, bounds.height, config.customX, config.customY)
-      mainWin.setPosition(x, y)
+    if (windows[instanceId]) {
+      windows[instanceId].close()
+      delete windows[instanceId]
     }
   }
 })
 
-ipcMain.on('open-settings', () => {
-  openSettings()
+// Cập nhật instance
+ipcMain.on('update-instance', (event, instanceId, updates) => {
+  const instance = config.instances.find(inst => inst.id === instanceId)
+  if (instance) {
+    Object.assign(instance, updates)
+    saveConfig(config)
+    
+    const win = windows[instanceId]
+    if (win) {
+      win.webContents.send('set-gif', instance.gifPath)
+      win.webContents.send('position-mode', instance.position)
+      win.webContents.send('drag-mode', instance.dragMode || false)
+      win.setIgnoreMouseEvents(instance.clickThrough, { forward: true })
+      
+      if (instance.position !== 'custom') {
+        const bounds = win.getBounds()
+        const { x, y } = calculatePosition(instance.position, bounds.width, bounds.height, instance.customX, instance.customY)
+        win.setPosition(x, y)
+      }
+    }
+  }
 })
