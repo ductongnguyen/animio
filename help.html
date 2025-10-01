@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #2c2c2c;
+      color: #fff;
+      overflow-y: auto;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px;
+    }
+    
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+    
+    h2 {
+      font-size: 22px;
+      margin-top: 30px;
+      margin-bottom: 15px;
+      color: #4CAF50;
+      border-bottom: 2px solid #4CAF50;
+      padding-bottom: 5px;
+    }
+    
+    h3 {
+      font-size: 18px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      color: #64B5F6;
+    }
+    
+    p {
+      line-height: 1.6;
+      margin-bottom: 10px;
+      color: #ddd;
+    }
+    
+    ul, ol {
+      line-height: 1.8;
+      margin-bottom: 15px;
+      color: #ddd;
+    }
+    
+    li {
+      margin-bottom: 8px;
+    }
+    
+    strong {
+      color: #fff;
+    }
+    
+    code {
+      background: #1e1e1e;
+      padding: 2px 6px;
+      border-radius: 3px;
+      color: #4CAF50;
+      font-family: 'Courier New', monospace;
+    }
+    
+    .tip-box {
+      background: #1e3a5f;
+      border-left: 4px solid #64B5F6;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+    
+    .warning-box {
+      background: #5f3a1e;
+      border-left: 4px solid #FF9800;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 4px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+    }
+    
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #555;
+    }
+    
+    th {
+      background: #1e1e1e;
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    
+    .emoji {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+    
+    .section {
+      margin-bottom: 30px;
+    }
+    
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: #0078d4;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      z-index: 1000;
+    }
+    
+    .back-btn:hover {
+      background: #106ebe;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #1e1e1e;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 5px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #777;
+    }
+  </style>
+</head>
+<body>
+  <button class="back-btn" onclick="window.close()">✕ Close</button>
+  
+  <div class="container">
+    <h1>📖 Animio - Usage Guide</h1>
+    <p>Complete guide to using Animio desktop animation widget</p>
+    
+    <div class="section">
+      <h2><span class="emoji">🚀</span>Getting Started</h2>
+      
+      <h3>First Launch</h3>
+      <ol>
+        <li>Run the application (<strong>Animio.exe</strong> on Windows)</li>
+        <li>The settings window will open automatically</li>
+        <li>A default animation will appear on your desktop</li>
+      </ol>
+      
+      <h3>System Tray Icon</h3>
+      <p>Look for the Animio icon in your system tray (bottom-right corner). This is your main control center for the app.</p>
+    </div>
+    
+    <div class="section">
+      <h2><span class="emoji">⚙️</span>Opening Settings</h2>
+      <p>There are multiple ways to access settings:</p>
+      <ul>
+        <li><strong>Right-click Animation:</strong> Right-click on any animation on your desktop</li>
+        <li><strong>System Tray Menu:</strong> Right-click the tray icon → "Manage Instances"</li>
+        <li><strong>Double-click Tray:</strong> Double-click the system tray icon</li>
+      </ul>
+    </div>
+    
+    <div class="section">
+      <h2><span class="emoji">🎬</span>Managing Multiple Animations</h2>
+      
+      <h3>Adding New Animations</h3>
+      <ol>
+        <li>Open settings window</li>
+        <li>Click the <strong>"+ Add New Instance"</strong> button (green button, top-right)</li>
+        <li>A new animation will appear with default settings</li>
+        <li>Customize it using the options below</li>
+      </ol>
+      
+      <h3>Configuring Each Animation</h3>
+      
+      <p><strong>1. GIF File</strong></p>
+      <ul>
+        <li>Click <strong>"Browse GIF"</strong> button</li>
+        <li>Select any GIF file from your computer</li>
+        <li>The animation will update immediately</li>
+      </ul>
+      
+      <p><strong>2. Position</strong></p>
+      <p>Choose from 6 positioning options:</p>
+      <ul>
+        <li><strong>Bottom Right:</strong> Default position (bottom-right corner)</li>
+        <li><strong>Bottom Left:</strong> Bottom-left corner</li>
+        <li><strong>Top Right:</strong> Top-right corner</li>
+        <li><strong>Top Left:</strong> Top-left corner</li>
+        <li><strong>Center:</strong> Center of screen</li>
+        <li><strong>Custom (Drag):</strong> Manually position anywhere</li>
+      </ul>
+      
+      <p><strong>3. Click-Through Mode</strong></p>
+      <ul>
+        <li>☑️ <strong>Enabled:</strong> Mouse clicks pass through the animation</li>
+        <li>☐ <strong>Disabled:</strong> Animation can be clicked and dragged</li>
+      </ul>
+      
+      <p><strong>4. Drag Mode</strong></p>
+      <ul>
+        <li>☑️ <strong>Enabled:</strong> Animation becomes draggable when settings window is open</li>
+        <li>☐ <strong>Disabled:</strong> Animation cannot be dragged</li>
+      </ul>
+      
+      <h3>Deleting Animations</h3>
+      <ul>
+        <li>Click the <strong>"Delete"</strong> button on any instance card</li>
+        <li>Confirm the deletion</li>
+      </ul>
+      <div class="warning-box">
+        ⚠️ <strong>Note:</strong> You must keep at least 1 animation
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2><span class="emoji">📍</span>Positioning Your Animations</h2>
+      
+      <h3>Method 1: Preset Positions</h3>
+      <ol>
+        <li>Open settings</li>
+        <li>Select a position from the dropdown (Bottom Right, Top Left, etc.)</li>
+        <li>Animation moves instantly</li>
+      </ol>
+      
+      <h3>Method 2: Custom Positioning</h3>
+      <ol>
+        <li>In settings, select <strong>"Custom (Drag)"</strong> from position dropdown</li>
+        <li>Click and drag the animation anywhere on screen</li>
+        <li>Position is saved automatically when you release</li>
+      </ol>
+      
+      <h3>Method 3: Drag Mode</h3>
+      <ol>
+        <li>Enable <strong>"Drag Mode"</strong> checkbox for the animation</li>
+        <li>Open settings window (animation becomes draggable)</li>
+        <li>Click and drag the animation to desired position</li>
+        <li>Position is saved automatically</li>
+      </ol>
+    </div>
+    
+    <div class="section">
+      <h2><span class="emoji">👻</span>Intelli-Hide Feature</h2>
+      
+      <h3>How it works:</h3>
+      <ul>
+        <li>Move your mouse over an animation → it automatically fades out (becomes transparent)</li>
+        <li>Move your mouse away → it fades back in</li>
+        <li>This prevents animations from blocking your work</li>
+      </ul>
+      
+      <h3>When is it disabled?</h3>
+      <ul>
+        <li>When Click-Through mode is enabled</li>
+        <li>When Drag Mode is enabled</li>
+        <li>While dragging an animation</li>
+      </ul>
+    </div>
+    
+    <div class="section">
+      <h2><span class="emoji">🚀</span>Auto-Start with Windows</h2>
+      
+      <h3>Enable Auto-Start:</h3>
+      <ol>
+        <li>Right-click the system tray icon</li>
+        <li>Check <strong>"Start with Windows"</strong></li>
+        <li>Animio will launch automatically when Windows starts</li>
+      </ol>
+      
+      <h3>Disable Auto-Start:</h3>
+      <ol>
+        <li>Right-click the system tray icon</li>
+        <li>Uncheck <strong>"Start with Windows"</strong></li>
+      </ol>
+    </div>
+    
+    <div class="section">
+      <h2><span class="emoji">⌨️</span>Quick Actions</h2>
+      
+      <table>
+        <thead>
+          <tr>
+            <th>Action</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Right-click animation</td>
+            <td>Open context menu / settings</td>
+          </tr>
+          <tr>
+            <td>Double-click tray icon</td>
+            <td>Open settings window</td>
+          </tr>
+          <tr>
+            <td>Drag animation</td>
+            <td>Only works when Drag Mode is enabled and settings window is open</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    
+    <div class="section">
+      <h2><span class="emoji">💡</span>Tips & Tricks</h2>
+      
+      <div class="tip-box">
+        <strong>1. Multiple Characters:</strong> Add multiple animations to create a lively desktop scene
+      </div>
+      
+      <div class="tip-box">
+        <strong>2. Work Mode:</strong> Enable Click-Through on all animations to work without interruption
+      </div>
+      
+      <div class="tip-box">
+        <strong>3. Custom GIFs:</strong> Use your favorite GIF files - anime characters, pets, memes, etc.
+      </div>
+      
+      <div class="tip-box">
+        <strong>4. Screen Corners:</strong> Place animations in corners to avoid blocking important content
+      </div>
+      
+      <div class="tip-box">
+        <strong>5. Intelli-Hide:</strong> Let animations fade when you need to see what's behind them
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2><span class="emoji">❓</span>Common Questions</h2>
+      
+      <h3>Q: How do I close the app?</h3>
+      <p>Right-click the system tray icon → "Quit"</p>
+      
+      <h3>Q: Can I use my own GIF files?</h3>
+      <p>Yes! Click "Browse GIF" for any instance and select your file</p>
+      
+      <h3>Q: Why can't I click on my animation?</h3>
+      <p>Check if "Click-Through Mode" is enabled. Disable it to interact with the animation</p>
+      
+      <h3>Q: How do I move an animation?</h3>
+      <p>Enable "Drag Mode" checkbox, open settings window, then drag the animation to desired position. OR select "Custom (Drag)" position and drag it directly</p>
+      
+      <h3>Q: Where are my settings saved?</h3>
+      <p>Windows: <code>%APPDATA%/animio/config.json</code></p>
+      <p>All settings save automatically</p>
+    </div>
+    
+    <div class="section">
+      <h2><span class="emoji">☕</span>Support Development</h2>
+      <p>If you enjoy using Animio, consider supporting the development:</p>
+      <p><a href="https://buymeacoffee.com/kazima" style="color: #FFDD00; text-decoration: none; font-weight: bold;">Buy Me a Coffee ☕</a></p>
+    </div>
+    
+    <div style="text-align: center; margin-top: 50px; padding: 20px; color: #888; border-top: 1px solid #555;">
+      <p>Animio v1.0.0 - Desktop Animation Widget</p>
+      <p>Made with ❤️</p>
+    </div>
+  </div>
+</body>
+</html>
