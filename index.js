@@ -3,6 +3,9 @@ const AutoLaunch = require('auto-launch')
 const path = require('path')
 const fs = require('fs')
 
+// Kiểm tra môi trường
+const isDev = !app.isPackaged
+
 // Tắt cache warnings
 app.commandLine.appendSwitch('disable-http-cache')
 
@@ -81,6 +84,7 @@ let tray = null
 const autoLauncher = new AutoLaunch({
   name: 'Anima E',
   path: app.getPath('exe'),
+  isHidden: true,
 })
 
 // Hàm tính vị trí dựa trên setting
@@ -145,7 +149,7 @@ function createGifWindow(instance) {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      devTools: false, // Vô hiệu hóa DevTools
+      devTools: isDev, // Chỉ bật DevTools trong development
     },
   })
   
@@ -247,6 +251,18 @@ app.on('ready', () => {
     
   updateTrayMenu()
   tray.on('double-click', () => openSettings())
+  
+  // Auto-open settings menu only if NOT launched with auto-start
+  // Check if app was started with --hidden flag or via auto-launch
+  const isAutoLaunched = app.getLoginItemSettings().wasOpenedAtLogin || 
+                         process.argv.includes('--hidden') ||
+                         app.commandLine.hasSwitch('hidden')
+  
+  if (!isAutoLaunched) {
+    setTimeout(() => {
+      openSettings()
+    }, 500)
+  }
 
   // Intelli-Hide: Xử lý sự kiện chuột (theo instance)
   let mouseCheckIntervals = {}
@@ -339,7 +355,7 @@ function openSettings() {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      devTools: false, // Vô hiệu hóa DevTools
+      devTools: isDev, // Chỉ bật DevTools trong development
     },
   })
   

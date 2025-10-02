@@ -5,11 +5,18 @@
   "main": "index.js",
   "scripts": {
     "start": "electron .",
+    "dev": "cross-env NODE_ENV=development electron .",
+    "clean": "node -e \"require('fs').rmSync('dist', {recursive: true, force: true})\"",
+    "prebuild": "npm run clean",
     "build": "electron-builder",
     "build:win": "electron-builder --win",
+    "build:win:portable": "electron-builder --win portable",
+    "build:win:nsis": "electron-builder --win nsis",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
-    "pack": "electron-packager . \"Anima E\" --platform=win32 --arch=x64 --out=dist --overwrite"
+    "build:all": "electron-builder -mwl",
+    "pack": "electron-builder --dir",
+    "postinstall": "electron-builder install-app-deps"
   },
   "keywords": [
     "desktop",
@@ -20,10 +27,13 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "electron": "^38.2.0",
     "electron-builder": "^24.13.3",
-    "electron-packager": "^17.1.2",
-    "png-to-ico": "^3.0.1"
+    "electron-packager": "^17.1.2"
+  },
+  "dependencies": {
+    "auto-launch": "^5.0.6"
   },
   "build": {
     "appId": "com.anima-e.desktop",
@@ -39,38 +49,63 @@
       "logo.png",
       "package.json"
     ],
+    "asar": true,
+    "forceCodeSigning": false,
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
       ],
-      "icon": "logo.png",
+      "icon": "favicon.ico",
       "sign": null,
-      "signingHashAlgorithms": null
+      "signingHashAlgorithms": null,
+      "certificateFile": null,
+      "certificatePassword": null,
+      "publisherName": "Anima E"
     },
     "mac": {
       "target": [
-        "dmg",
-        "zip"
+        {
+          "target": "dmg",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "zip",
+          "arch": ["x64", "arm64"]
+        }
       ],
-      "category": "public.app-category.entertainment"
+      "category": "public.app-category.entertainment",
+      "icon": "logo.png"
     },
     "linux": {
       "target": [
-        "AppImage",
-        "deb"
+        {
+          "target": "AppImage",
+          "arch": ["x64"]
+        },
+        {
+          "target": "deb",
+          "arch": ["x64"]
+        }
       ],
-      "category": "Utility"
+      "category": "Utility",
+      "icon": "logo.png"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
+      "createStartMenuShortcut": true,
+      "shortcutName": "Anima E"
     },
-    "forceCodeSigning": false
-  },
-  "dependencies": {
-    "auto-launch": "^5.0.6"
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    }
   }
 }
