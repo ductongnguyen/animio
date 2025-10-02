@@ -89,7 +89,8 @@ const autoLauncher = new AutoLaunch({
 
 // Hàm tính vị trí dựa trên setting
 function calculatePosition(position, winWidth, winHeight, customX = null, customY = null) {
-  const { workArea } = screen.getPrimaryDisplay()
+  const display = screen.getPrimaryDisplay()
+  const { bounds } = display // Sử dụng bounds thay vì workArea để có thể đè lên taskbar
   let x, y
   
   switch(position) {
@@ -99,30 +100,30 @@ function calculatePosition(position, winWidth, winHeight, customX = null, custom
         x = customX
         y = customY
       } else {
-        x = workArea.x + workArea.width - winWidth
-        y = workArea.y + workArea.height - winHeight
+        x = bounds.x + bounds.width - winWidth
+        y = bounds.y + bounds.height - winHeight
       }
       break
     case 'bottom-left':
-      x = workArea.x
-      y = workArea.y + workArea.height - winHeight
+      x = bounds.x
+      y = bounds.y + bounds.height - winHeight
       break
     case 'top-right':
-      x = workArea.x + workArea.width - winWidth
-      y = workArea.y
+      x = bounds.x + bounds.width - winWidth
+      y = bounds.y
       break
     case 'top-left':
-      x = workArea.x
-      y = workArea.y
+      x = bounds.x
+      y = bounds.y
       break
     case 'center':
-      x = workArea.x + (workArea.width - winWidth) / 2
-      y = workArea.y + (workArea.height - winHeight) / 2
+      x = bounds.x + (bounds.width - winWidth) / 2
+      y = bounds.y + (bounds.height - winHeight) / 2
       break
     case 'bottom-right':
     default:
-      x = workArea.x + workArea.width - winWidth
-      y = workArea.y + workArea.height - winHeight
+      x = bounds.x + bounds.width - winWidth
+      y = bounds.y + bounds.height - winHeight
       break
   }
   
@@ -146,11 +147,44 @@ function createGifWindow(instance) {
     hasShadow: false,
     movable: true,
     skipTaskbar: true, // Ẩn khỏi taskbar
+    type: 'toolbar', // Quan trọng: type toolbar giúp đè lên taskbar trên Windows
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
       devTools: isDev, // Chỉ bật DevTools trong development
     },
+  })
+  
+  // Hàm force window lên trên cùng
+  const forceOnTop = () => {
+    if (win && !win.isDestroyed()) {
+      win.setAlwaysOnTop(false)
+      win.setAlwaysOnTop(true, 'screen-saver', 1)
+    }
+  }
+  
+  // Đặt window level cao nhất ngay từ đầu
+  forceOnTop()
+  
+  // Event-based: Set lại khi có thay đổi focus
+  win.on('blur', () => {
+    setTimeout(forceOnTop, 50)
+  })
+  
+  win.on('focus', forceOnTop)
+  win.on('show', forceOnTop)
+  
+  // Interval nhẹ: chỉ chạy mỗi 2 giây thay vì 500ms để tiết kiệm tài nguyên
+  // Vẫn cần interval vì taskbar có thể tự refresh z-order
+  const keepOnTopInterval = setInterval(() => {
+    forceOnTop()
+  }, 2000)
+  
+  // Dọn dẹp interval khi window đóng
+  win.on('closed', () => {
+    if (keepOnTopInterval) {
+      clearInterval(keepOnTopInterval)
+    }
   })
   
   // Lắng nghe sự kiện kéo thả
