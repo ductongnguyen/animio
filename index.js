@@ -54,7 +54,7 @@ function loadConfig() {
   return { 
     instances: [{
       id: 'default',
-      gifPath: path.join(__dirname, 'e9 dance.gif'),
+      gifPath: path.join(__dirname, 'default.gif'),
       clickThrough: false,
       dragMode: false,
       position: 'bottom-right',
@@ -452,7 +452,7 @@ ipcMain.handle('get-instances', () => {
 })
 
 ipcMain.handle('get-default-gif-path', () => {
-  return path.join(__dirname, 'e9 dance.gif')
+  return path.join(__dirname, 'default.gif')
 })
 
 ipcMain.handle('select-gif-file', async () => {
