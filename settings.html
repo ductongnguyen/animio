@@ -134,27 +134,106 @@
       border-radius: 4px;
       margin-top: 5px;
     }
+    
+    .donation-box {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    
+    .donation-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .donation-text {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    
+    .donation-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+    }
+    
+    .donation-subtitle {
+      font-size: 13px;
+      color: #f0e6ff;
+    }
+    
+    .donation-btn {
+      padding: 10px 20px;
+      background: #FFDD00;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .donation-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(255, 221, 0, 0.4);
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Anima E - Manage GIF Instances</h1>
+    <h1>Animio</h1>
     <div style="display: flex; gap: 10px;">
+      <button style="padding: 8px 16px; background: #0078d4; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;" id="helpBtn">📖 Help</button>
       <button class="add-btn" id="addBtn">+ Add New Instance</button>
     </div>
+  </div>
+  
+  <div class="donation-box">
+    <div class="donation-content">
+      <div style="font-size: 24px;">☕</div>
+      <div class="donation-text">
+        <div class="donation-title">Enjoying Animio?</div>
+        <div class="donation-subtitle">Support development with a coffee!</div>
+      </div>
+    </div>
+    <a href="https://buymeacoffee.com/kazima" class="donation-btn" id="donationBtn">Buy Me a Coffee</a>
   </div>
   
   <div class="instances-list" id="instancesList"></div>
   
   <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #555; color: #aaa; font-size: 12px;">
-    💡 Changes are saved automatically. Config file location: <code style="background: #1e1e1e; padding: 2px 6px; border-radius: 3px;">%AppData%/anima-e/config.json</code>
+    💡 Changes are saved automatically. Config file location: <code style="background: #1e1e1e; padding: 2px 6px; border-radius: 3px;">%AppData%/animio/config.json</code>
   </div>
   
   <script>
     const { ipcRenderer } = require('electron')
+    const { shell } = require('electron')
     const path = require('path')
     
     let instances = []
+    
+    // Handle donation button click
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('donationBtn').addEventListener('click', (e) => {
+        e.preventDefault()
+        shell.openExternal('https://buymeacoffee.com/kazima')
+      })
+      
+      // Handle help button click
+      document.getElementById('helpBtn').addEventListener('click', () => {
+        ipcRenderer.send('open-help')
+      })
+    })
     
     // Load instances
     async function loadInstances() {

@@ -1,5 +1,5 @@
 {
-  "name": "anima-e",
+  "name": "animio",
   "version": "1.0.0",
   "description": "Desktop animation widget with intelligent hide feature",
   "main": "index.js",
@@ -36,8 +36,8 @@
     "auto-launch": "^5.0.6"
   },
   "build": {
-    "appId": "com.anima-e.desktop",
-    "productName": "Anima E",
+    "appId": "com.animio.desktop",
+    "productName": "Animio",
     "directories": {
       "output": "dist"
     },
@@ -45,6 +45,7 @@
       "index.js",
       "index.html",
       "settings.html",
+      "help.html",
       "*.gif",
       "logo.png",
       "package.json"
@@ -67,7 +68,7 @@
       "signingHashAlgorithms": null,
       "certificateFile": null,
       "certificatePassword": null,
-      "publisherName": "Anima E"
+      "publisherName": "Animio"
     },
     "mac": {
       "target": [
@@ -102,7 +103,7 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Anima E"
+      "shortcutName": "Animio"
     },
     "portable": {
       "artifactName": "${productName}-${version}-portable.${ext}"

@@ -1,4 +1,4 @@
-const { app, BrowserWindow, screen, ipcMain, dialog, Menu, Tray, nativeImage, globalShortcut } = require('electron')
+const { app, BrowserWindow, screen, ipcMain, dialog, Menu, Tray, nativeImage } = require('electron')
 const AutoLaunch = require('auto-launch')
 const path = require('path')
 const fs = require('fs')
@@ -78,11 +78,12 @@ function saveConfig(config) {
 let config = loadConfig()
 let windows = {} // Object để lưu các window instances: { instanceId: BrowserWindow }
 let settingsWin = null
+let helpWin = null
 let tray = null
 
 // Cấu hình auto launch
 const autoLauncher = new AutoLaunch({
-  name: 'Anima E',
+  name: 'Animio',
   path: app.getPath('exe'),
   isHidden: true,
 })
@@ -254,6 +255,10 @@ app.on('ready', () => {
           click: () => openSettings()
         },
         {
+          label: 'Help Guide',
+          click: () => openHelp()
+        },
+        {
           type: 'separator'
         },
         {
@@ -383,7 +388,7 @@ function openSettings() {
     width: 600,
     height: 500,
     resizable: true,
-    title: 'Anima E - Manage GIF Instances',
+    title: 'Animio - Manage GIF Instances',
     icon: path.join(__dirname, 'logo.png'), // App icon
     autoHideMenuBar: true, // Ẩn menu bar
     webPreferences: {
@@ -410,6 +415,34 @@ function openSettings() {
       }
     })
     settingsWin = null
+  })
+}
+
+// Mở cửa sổ help
+function openHelp() {
+  if (helpWin) {
+    helpWin.focus()
+    return
+  }
+  
+  helpWin = new BrowserWindow({
+    width: 900,
+    height: 700,
+    resizable: true,
+    title: 'Animio - Usage Guide',
+    icon: path.join(__dirname, 'logo.png'),
+    autoHideMenuBar: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      devTools: isDev,
+    },
+  })
+  
+  helpWin.loadFile('help.html')
+  
+  helpWin.on('closed', () => {
+    helpWin = null
   })
 }
 
@@ -479,4 +512,9 @@ ipcMain.on('update-instance', (event, instanceId, updates) => {
       }
     }
   }
+})
+
+// Mở help window
+ipcMain.on('open-help', () => {
+  openHelp()
 })
